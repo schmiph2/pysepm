@@ -1,5 +1,6 @@
 # pysepm - Speech Enhancement Performance Measures (Quality and Intelligibility) Implemented in Python
-Python implementation of performance measures in Loizou's Speech Enhancement Book
+Python implementation of performance measures in Philipos C. Loizou's [Speech Enhancement Book](https://www.crcpress.com/Speech-Enhancement-Theory-and-Practice-Second-Edition/Loizou/p/book/9781138075573) 
+
 
 # Requirements
 
