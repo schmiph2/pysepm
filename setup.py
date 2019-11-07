@@ -16,7 +16,7 @@ setup(
 	],
 	dependency_links=[
 		'git://git@github.com/schmiph2/python-pesq.git#egg=pypesq',
-	]
+	],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
