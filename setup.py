@@ -9,7 +9,11 @@ setup(
     author_email='scdp@zhaw.ch',
     url='https://github.zhaw.ch/scdp/py-sepm',
     license='MIT',
-    install_requires=['numpy', 'scipy','pystoi'],
+    install_requires=['numpy',
+		 'scipy',
+		'pystoi @ https://github.com/schmiph2/pystoi/archive/master.zip#egg=pystoi',
+		'pypesq @ https://github.com/schmiph2/python-pesq/archive/master.zip#egg=pypesq',
+	], 
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
