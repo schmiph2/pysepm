@@ -14,7 +14,7 @@ setup(
 		'pystoi @ https://github.com/schmiph2/pystoi/archive/master.zip#egg=pystoi',
 		'pypesq',
 	],
-	dependency_links=[
+    dependency_links=[
 		'git://git@github.com/schmiph2/python-pesq.git#egg=pypesq',
 	],
     classifiers=[
