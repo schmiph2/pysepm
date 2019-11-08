@@ -19,3 +19,8 @@ Python implementation of objective quality and intelligibilty measures mentioned
 
 # Implemented Speech Intelligibility Measures
 + Short-time objective intelligibility (stoi)
+
+# Install with pip
+```
+$ pip3 install https://github.com/schmiph2/pysepm/archive/master.zip
+```
