@@ -21,13 +21,13 @@ Python implementation of objective quality and intelligibilty measures mentioned
 + Short-time objective intelligibility (stoi)
 
 # Install with pip
-The setup.py is not finished yet. You have to install the dependencies by hand
+The setup.py is not finished yet. You have to install the dependencies by hand.
 
 First install Cython (Required for python-pesq):
 ```
 pip3 install Cython
 ```
-Then install python-pesq and pystoi
+Then install python-pesq and pystoi:
 ```
 pip3 install https://github.com/schmiph2/python-pesq/archive/master.zip
 pip3 install https://github.com/schmiph2/pystoi/archive/master.zip
