@@ -4,6 +4,8 @@ Python implementation of objective quality and intelligibilty measures mentioned
 
 # Requirements
 
+    gcc compiler
+    cython
     numpy
     scipy
     pystoi
