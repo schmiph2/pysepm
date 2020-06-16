@@ -11,8 +11,8 @@ setup(
     license='MIT',
     install_requires=['numpy',
 		 'scipy',
-		'pystoi @ https://github.com/schmiph2/pystoi/archive/master.zip#egg=pystoi-1.0.0',
-		'pypesq @ https://github.com/schmiph2/python-pesq/archive/master.zip#egg=pypesq-1.0.0',
+		'pystoi',
+		'pesq',
 	],
     classifiers=[
         'Development Status :: 4 - Beta',
