@@ -10,8 +10,8 @@ Python implementation of objective quality and intelligibilty measures mentioned
     scipy
     pystoi
     pypesq 
-    
-# Implemented Speech Quality Measures
+# Implemented Measures
+## Speech Quality Measures
 + Segmental Signal-to-Noise Ratio (SNRseg)
 + Frequency-weighted Segmental SNR (fwSNRseg)
 + Log-likelihood Ratio (LLR)
@@ -19,12 +19,12 @@ Python implementation of objective quality and intelligibilty measures mentioned
 + Perceptual Evaluation of Speech Quality (PESQ)
 + Composite Objective Speech Quality (composite)
 
-# Implemented Speech Intelligibility Measures
+## Speech Intelligibility Measures
 + Short-time objective intelligibility (STOI)
 + Coherence and speech intelligibility index (CSII)
 + Normalized-covariance measure (NCM)
 
-# Dereverberation Measures (TOD0)
+## Dereverberation Measures (TOD0)
 + Signal to reverberant ratio (SRR)
 + Reverberation decay tail (RDT)
 + Bark spectral distortion (BSD) 
