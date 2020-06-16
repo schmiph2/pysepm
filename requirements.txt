@@ -1,0 +1,5 @@
+cython
+scipy
+numpy
+pesq
+pystoi
