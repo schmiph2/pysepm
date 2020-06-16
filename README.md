@@ -21,6 +21,7 @@ Python implementation of objective quality and intelligibilty measures mentioned
 
 # Implemented Speech Intelligibility Measures
 + Short-time objective intelligibility (stoi)
++ Coherence and speech intelligibility index (CSII)
 
 # Install with pip
 The setup.py is not finished yet. You have to install the dependencies by hand.
