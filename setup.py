@@ -9,8 +9,11 @@ setup(
     author_email='scdp@zhaw.ch',
     url='https://github.zhaw.ch/scdp/py-sepm',
     license='MIT',
-    install_requires=['numpy',
-		 'scipy',
+    install_requires=[
+	    	'cython',
+	    	'wheel',
+	    	'numpy',
+		'scipy',
 		'pystoi',
 		'pesq',
 	],
