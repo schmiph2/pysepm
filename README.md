@@ -14,15 +14,21 @@ Python implementation of objective quality and intelligibilty measures mentioned
 # Implemented Speech Quality Measures
 + Segmental Signal-to-Noise Ratio (SNRseg)
 + Frequency-weighted Segmental SNR (fwSNRseg)
-+ Log-likelihood Ratio (llr)
-+ Weighted Spectral Slope (wss)
-+ Perceptual Evaluation of Speech Quality (pesq)
++ Log-likelihood Ratio (LLR)
++ Weighted Spectral Slope (WSS)
++ Perceptual Evaluation of Speech Quality (PESQ)
 + Composite Objective Speech Quality (composite)
 
 # Implemented Speech Intelligibility Measures
-+ Short-time objective intelligibility (stoi)
++ Short-time objective intelligibility (STOI)
 + Coherence and speech intelligibility index (CSII)
 + Normalized-covariance measure (NCM)
+
+# Dereverberation Measures (TOD0)
++ Signal to reverberant ratio (SRR)
++ Reverberation decay tail (RDT)
++ Bark spectral distortion (BSD) 
++ Speech to reverberation modulation ratio (SRMR)
 
 # Install with pip
 The setup.py is not finished yet. You have to install the dependencies by hand.
