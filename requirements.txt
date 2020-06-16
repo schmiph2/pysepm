@@ -1,6 +1,0 @@
-cython
-wheel
-scipy
-numpy
-pesq
-pystoi
