@@ -1,5 +1,8 @@
 __version__ = '0.1'
 
 
-from .speechEnhPerfMetrics import fwSNRseg,SNRseg,llr,wss,composite,pesq,stoi
+from .qualityMeasures import fwSNRseg,SNRseg,llr,wss,composite,pesq
+from .intelligibilityMeasures import stoi,csii,ncm
+from .reverberationMeasures import srr_seg,rdt,bsd,srmr
+
 
