@@ -1,5 +1,4 @@
-from setuptools import setup
-from setuptools import find_packages
+from setuptools import setup,find_packages
 
 setup(
     name='pysepm',
@@ -9,6 +8,7 @@ setup(
     author_email='scdp@zhaw.ch',
     url='https://github.zhaw.ch/scdp/py-sepm',
     license='MIT',
+    setup_requires = ['cython','wheel','numpy'],
     install_requires=[
 	    	'cython',
 	    	'wheel',
@@ -16,6 +16,8 @@ setup(
 		'scipy',
 		'pystoi',
 		'pesq',
+        'Gammatone @ https://github.com/detly/gammatone/archive/master.zip#egg=Gammatone',
+        'SRMRpy @ https://github.com/jfsantos/SRMRpy/archive/master.zip#egg=srmr',
 	],
     classifiers=[
         'Development Status :: 4 - Beta',
