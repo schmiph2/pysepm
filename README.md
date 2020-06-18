@@ -18,15 +18,15 @@ Python implementation of objective quality and intelligibilty measures mentioned
 + Weighted Spectral Slope (WSS)
 + Perceptual Evaluation of Speech Quality (PESQ)
 + Composite Objective Speech Quality (composite)
++ Cepstrum Distance Objective Speech Quality Measure (CD)
 
 ## Speech Intelligibility Measures
 + Short-time objective intelligibility (STOI)
 + Coherence and speech intelligibility index (CSII)
 + Normalized-covariance measure (NCM)
 
-## Dereverberation Measures (TOD0)
+## Dereverberation Measures (TODO)
 + Signal to reverberant ratio (SRR)
-+ Reverberation decay tail (RDT)
 + Bark spectral distortion (BSD) 
 + Speech to reverberation modulation ratio (SRMR)
 
