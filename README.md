@@ -31,24 +31,12 @@ Python implementation of objective quality and intelligibilty measures mentioned
 + Speech to reverberation modulation ratio (SRMR)
 
 # Install with pip
-The setup.py is not finished yet. You have to install the dependencies by hand.
-
-First install Cython (Required for python-pesq):
-```
-pip3 install Cython
-```
-Then install python-pesq and pystoi:
-```
-pip3 install https://github.com/schmiph2/python-pesq/archive/master.zip
-pip3 install https://github.com/schmiph2/pystoi/archive/master.zip
-```
-Finally install pysepm:
+Install pysepm:
 ```
 pip3 install https://github.com/schmiph2/pysepm/archive/master.zip
 ```
 
 
 # TODO:
-+ Finish setup script
 + systematic tests for all measures
 + change resample method used (e.g. in NCM) to fit matlab implementation
