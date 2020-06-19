@@ -5,7 +5,7 @@ import numpy as np
 
 from .util import extract_overlapped_windows
 
-stoi = pystoi.stoi.stoi
+stoi = pystoi.stoi
 
 def fwseg_noise(clean_speech, processed_speech,fs,frameLen=0.03, overlap=0.75):
     
