@@ -1,6 +1,6 @@
 from scipy.signal import stft,get_window,correlate,resample
 from scipy.linalg import solve_toeplitz,toeplitz
-from pypesq import pypesq # https://github.com/ludlows/python-pesq
+import pesq as pypesq # https://github.com/ludlows/python-pesq
 import numpy as np
 
 from .util import extract_overlapped_windows
@@ -52,7 +52,7 @@ def fwSNRseg(cleanSig, enhancedSig, fs, frameLen=0.03, overlap=0.75):
     cent_freq[6]  = 470.000;   bandwidth[6]  = 70.0000;
     cent_freq[7]  = 540.000;   bandwidth[7]  = 77.3724;
     cent_freq[8]  = 617.372;   bandwidth[8]  = 86.0056;
-    cent_freq[9] = 703.378;    bandwidth[9] = 95.3398;
+    cent_freq[9] =  703.378;   bandwidth[9] =  95.3398;
     cent_freq[10] = 798.717;   bandwidth[10] = 105.411;
     cent_freq[11] = 904.128;   bandwidth[11] = 116.256;
     cent_freq[12] = 1020.38;   bandwidth[12] = 127.914;
@@ -131,10 +131,9 @@ def lpcoeff(speech_frame, model_order):
     lpparams=np.ones((model_order+1))
     lpparams[1:]=solve_toeplitz(R[0:-1],-R[1:])
     
-    
     return(lpparams,R)
 
-def llr(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
+def llr(clean_speech, processed_speech, fs, used_for_composite=False, frameLen=0.03, overlap=0.75):
     eps=np.finfo(np.float64).eps
     alpha = 0.95
     winlength   = round(frameLen*fs) #window length in samples
@@ -162,7 +161,8 @@ def llr(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
     frac=numerators/denominators
     frac[frac<=0]=1000
     distortion = np.log(frac)
-    #distortion[distortion>2]=2 # this line is not in composite measure matlab implementation of loizou
+    if not used_for_composite:
+        distortion[distortion>2]=2 # this line is not in composite measure matlab implementation of loizou
     distortion = np.sort(distortion)
     distortion = distortion[:int(round(len(distortion)*alpha))]
     return np.mean(distortion)
@@ -308,30 +308,32 @@ def wss(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
 
 def pesq(clean_speech, processed_speech, fs):
     if fs == 8000:
-        pesq_mos = pypesq(fs,clean_speech, processed_speech, 'nb')
-        pesq_mos = 46607/14945 - (2000*np.log(1/(pesq_mos/4 - 999/4000) - 1))/2989 #remap to raw pesq score
+        mos_lqo = pypesq.pesq(fs,clean_speech, processed_speech, 'nb')
+        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989 #remap to raw pesq score
 
     elif fs == 16000:
-        pesq_mos = pypesq(fs,clean_speech, processed_speech, 'wb')
+        mos_lqo = pypesq.pesq(fs,clean_speech, processed_speech, 'wb')
+        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989 #remap to raw pesq score
     elif fs >= 16000:
         numSamples=round(len(clean_speech)/fs*16000)
         fs = 16000
-        pesq_mos = pypesq(fs,resample(clean_speech, numSamples), resample(processed_speech, numSamples), 'wb')
+        mos_lqo = pypesq.pesq(fs,resample(clean_speech, numSamples), resample(processed_speech, numSamples), 'wb')
+        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989 #remap to raw pesq score
     else:
         numSamples=round(len(clean_speech)/fs*8000)
         fs = 8000
-        pesq_mos = pypesq(fs,resample(clean_speech, numSamples), resample(processed_speech, numSamples), 'nb')
-        pesq_mos = 46607/14945 - (2000*np.log(1/(pesq_mos/4 - 999/4000) - 1))/2989 #remap to raw pesq score
+        mos_lqo = pypesq.pesq(fs,resample(clean_speech, numSamples), resample(processed_speech, numSamples), 'nb')
+        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989 #remap to raw pesq score
 
-    return pesq_mos
+    return mos_lqo,pesq_mos
 
 
 
 def composite(clean_speech, processed_speech, fs):
     wss_dist=wss(clean_speech, processed_speech, fs)
-    llr_mean=llr(clean_speech, processed_speech, fs)
+    llr_mean=llr(clean_speech, processed_speech, fs,used_for_composite=True)
     segSNR=SNRseg(clean_speech, processed_speech, fs)
-    pesq_mos = pesq(clean_speech, processed_speech,fs)
+    mos_lqo,pesq_mos = pesq(clean_speech, processed_speech,fs)
 
     Csig = 3.093 - 1.029*llr_mean + 0.603*pesq_mos-0.009*wss_dist
     Csig = np.max((1,Csig))  
@@ -342,4 +344,60 @@ def composite(clean_speech, processed_speech, fs):
     Covl = 1.594 + 0.805*pesq_mos - 0.512*llr_mean - 0.007*wss_dist
     Covl = np.max((1, Covl))
     Covl = np.min((5, Covl)) # limit values to [1, 5]
-    return Csig,Cbak,Covl	
+    return Csig,Cbak,Covl
+
+def lpc2cep(a):
+    #
+    # converts prediction to cepstrum coefficients
+    #
+    # Author: Philipos C. Loizou
+
+    M=len(a);
+    cep=np.zeros((M-1,));
+
+    cep[0]=-a[1]
+
+    for k in range(2,M):
+        ix=np.arange(1,k)
+        vec1=cep[ix-1]*a[k-1:0:-1]*(ix)
+        cep[k-1]=-(a[k]+np.sum(vec1)/k);
+    return cep
+
+
+def cepstrum_distance(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
+    
+    
+    clean_length      = len(clean_speech)
+    processed_length  = len(processed_speech)
+
+    winlength   = round(frameLen*fs) #window length in samples
+    skiprate    = int(np.floor((1-overlap)*frameLen*fs)) #window skip in samples
+    
+    if fs<10000:
+        P = 10 # LPC Analysis Order
+    else:
+        P=16;    # this could vary depending on sampling frequency.
+
+    C=10*np.sqrt(2)/np.log(10)
+
+    numFrames = int(clean_length/skiprate-(winlength/skiprate)); # number of frames
+
+    hannWin=0.5*(1-np.cos(2*np.pi*np.arange(1,winlength+1)/(winlength+1)))
+    clean_speech_framed=extract_overlapped_windows(clean_speech[0:int(numFrames)*skiprate+int(winlength-skiprate)],winlength,winlength-skiprate,hannWin)
+    processed_speech_framed=extract_overlapped_windows(processed_speech[0:int(numFrames)*skiprate+int(winlength-skiprate)],winlength,winlength-skiprate,hannWin)   
+    distortion = np.zeros((numFrames,))
+
+    for ii in range(numFrames):
+        A_clean,R_clean=lpcoeff(clean_speech_framed[ii,:],P)
+        A_proc,R_proc=lpcoeff(processed_speech_framed[ii,:],P)
+
+        C_clean=lpc2cep(A_clean)
+        C_processed=lpc2cep(A_proc)
+        distortion[ii] = min((10,C*np.linalg.norm(C_clean-C_processed)))
+    
+    IS_dist = distortion
+    alpha=0.95
+    IS_len= round( len( IS_dist)* alpha)
+    IS = np.sort(IS_dist)
+    cep_mean= np.mean( IS[ 0: IS_len]) 
+    return cep_mean
