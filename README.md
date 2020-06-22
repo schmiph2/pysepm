@@ -26,10 +26,8 @@ Python implementation of objective quality and intelligibilty measures mentioned
 + Normalized-covariance measure (NCM)
 
 ## Dereverberation Measures (TODO)
-+ Signal to reverberant ratio (SRR)
 + Bark spectral distortion (BSD) 
-+ Speech to reverberation modulation ratio (SRMR)
-
++ Scale-invariant signal to distortion ratio (SI-SDR)
 # Install with pip
 Install pysepm:
 ```
