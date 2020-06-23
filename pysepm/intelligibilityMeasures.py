@@ -199,19 +199,9 @@ def get_ansis(BAND):
 def ncm(clean_speech,processed_speech,fs):
 
     if fs != 8000 and  fs != 16000:
-        if fs >= 16000:
-            numSamples=round(len(clean_speech)/fs*16000)
-            clean_speech = resample(clean_speech, numSamples)
-            numSamples=round(len(processed_speech)/fs*16000)
-            processed_speech = resample(processed_speech, numSamples)
-            fs = 16000
-        else:
-            numSamples=round(len(clean_speech)/fs*8000)
-            clean_speech = resample(clean_speech, numSamples)
-            numSamples=round(len(processed_speech)/fs*8000)
-            processed_speech = resample(processed_speech, numSamples)
-            fs = 8000
-
+        raise ValueError('fs must be either 8 kHz or 16 kHz')
+                         
+                         
         
     x= clean_speech  # clean signal
     y= processed_speech # noisy signal
@@ -249,6 +239,7 @@ def ncm(clean_speech,processed_speech,fs):
         X_BANDS[:,a] = lfilter( B_bp , A_bp , x )
         Y_BANDS[:,a] = lfilter( B_bp , A_bp , y )
 
+    gcd = np.gcd(F_SIGNAL, F_ENVELOPE)
     #   CALCULATE HILBERT ENVELOPES, and resample at F_ENVELOPE Hz
     analytic_x = hilbert( X_BANDS,axis=0);
     X   = np.abs( analytic_x );
