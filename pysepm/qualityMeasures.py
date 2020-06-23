@@ -309,39 +309,34 @@ def wss(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
 def pesq(clean_speech, processed_speech, fs):
     if fs == 8000:
         mos_lqo = pypesq.pesq(fs,clean_speech, processed_speech, 'nb')
-        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989 #remap to raw pesq score
-
+        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989#0.999 + ( 4.999-0.999 ) / ( 1+np.exp(-1.4945*pesq_mos+4.6607) )
     elif fs == 16000:
         mos_lqo = pypesq.pesq(fs,clean_speech, processed_speech, 'wb')
-        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989 #remap to raw pesq score
-    elif fs >= 16000:
-        numSamples=round(len(clean_speech)/fs*16000)
-        fs = 16000
-        mos_lqo = pypesq.pesq(fs,resample(clean_speech, numSamples), resample(processed_speech, numSamples), 'wb')
-        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989 #remap to raw pesq score
+        pesq_mos = np.NaN
     else:
-        numSamples=round(len(clean_speech)/fs*8000)
-        fs = 8000
-        mos_lqo = pypesq.pesq(fs,resample(clean_speech, numSamples), resample(processed_speech, numSamples), 'nb')
-        pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989 #remap to raw pesq score
-
-    return mos_lqo,pesq_mos
-
+        raise ValueError('fs must be either 8 kHz or 16 kHz')
+        
+    return pesq_mos,mos_lqo
 
 
 def composite(clean_speech, processed_speech, fs):
     wss_dist=wss(clean_speech, processed_speech, fs)
     llr_mean=llr(clean_speech, processed_speech, fs,used_for_composite=True)
     segSNR=SNRseg(clean_speech, processed_speech, fs)
-    mos_lqo,pesq_mos = pesq(clean_speech, processed_speech,fs)
+    pesq_mos,mos_lqo = pesq(clean_speech, processed_speech,fs)
+    
+    if fs >= 16e3:
+        used_pesq_val = mos_lqo
+    else:
+        used_pesq_val = pesq_mos    
 
-    Csig = 3.093 - 1.029*llr_mean + 0.603*pesq_mos-0.009*wss_dist
+    Csig = 3.093 - 1.029*llr_mean + 0.603*used_pesq_val-0.009*wss_dist
     Csig = np.max((1,Csig))  
     Csig = np.min((5, Csig)) # limit values to [1, 5]
-    Cbak = 1.634 + 0.478 *pesq_mos - 0.007*wss_dist + 0.063*segSNR
+    Cbak = 1.634 + 0.478 *used_pesq_val - 0.007*wss_dist + 0.063*segSNR
     Cbak = np.max((1, Cbak))
     Cbak = np.min((5,Cbak)) # limit values to [1, 5]
-    Covl = 1.594 + 0.805*pesq_mos - 0.512*llr_mean - 0.007*wss_dist
+    Covl = 1.594 + 0.805*used_pesq_val - 0.512*llr_mean - 0.007*wss_dist
     Covl = np.max((1, Covl))
     Covl = np.min((5, Covl)) # limit values to [1, 5]
     return Csig,Cbak,Covl
