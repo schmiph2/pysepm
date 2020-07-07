@@ -118,18 +118,63 @@ def fwSNRseg(cleanSig, enhancedSig, fs, frameLen=0.03, overlap=0.75):
     return np.mean(distortion)
 	
 	
+#def lpcoeff(speech_frame, model_order):
+#   # ----------------------------------------------------------
+#   # (1) Compute Autocorrelation Lags
+#   # ----------------------------------------------------------
+#
+#    R=correlate(speech_frame,speech_frame) 
+#    R=R[len(speech_frame)-1:len(speech_frame)+model_order]
+#   # ----------------------------------------------------------
+#   # (2) Levinson-Durbin
+#   # ----------------------------------------------------------
+#    lpparams=np.ones((model_order+1))
+#    lpparams[1:]=solve_toeplitz(R[0:-1],-R[1:])
+#    
+#    return(lpparams,R)
+
 def lpcoeff(speech_frame, model_order):
    # ----------------------------------------------------------
    # (1) Compute Autocorrelation Lags
    # ----------------------------------------------------------
-
+    winlength = max(speech_frame.shape)
+    #R = np.zeros((model_order+1,))
+    #for k in range(model_order+1):
+    #    if k==0:
+    #        R[k]=np.sum(speech_frame[0:]*speech_frame[0:])
+    #    else:
+    #        R[k]=np.sum(speech_frame[0:-k]*speech_frame[k:])
+    #    
+     
     R=correlate(speech_frame,speech_frame) 
     R=R[len(speech_frame)-1:len(speech_frame)+model_order]
    # ----------------------------------------------------------
    # (2) Levinson-Durbin
    # ----------------------------------------------------------
-    lpparams=np.ones((model_order+1))
-    lpparams[1:]=solve_toeplitz(R[0:-1],-R[1:])
+    a = np.ones((model_order,))
+    a_past = np.ones((model_order,))
+    rcoeff = np.zeros((model_order,))
+    E = np.zeros((model_order+1,))
+
+    E[0]=R[0]
+
+    for i in range(0,model_order):
+        a_past[0:i] = a[0:i]
+
+        sum_term = sum(a_past[0:i]*R[i:0:-1])
+        rcoeff[i]=(R[i+1] - sum_term) / E[i]
+        a[i]=rcoeff[i]
+        if i==0:
+            a[0:i] = a_past[0:i] - rcoeff[i]*np.array([])
+        else:
+            a[0:i] = a_past[0:i] - rcoeff[i]*a_past[i-1::-1]
+
+        E[i+1]=(1-rcoeff[i]*rcoeff[i])*E[i]
+
+    acorr    = R;
+    refcoeff = rcoeff;
+    lpparams = np.ones((model_order+1,))
+    lpparams[1:] = -a
     
     return(lpparams,R)
 
