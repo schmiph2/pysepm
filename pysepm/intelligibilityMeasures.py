@@ -3,7 +3,7 @@ from scipy.interpolate import interp1d
 import pystoi.stoi # https://github.com/mpariente/pystoi
 import numpy as np
 
-from .util import extract_overlapped_windows
+from .util import extract_overlapped_windows,resample_matlab_like
 
 stoi = pystoi.stoi
 
@@ -243,12 +243,12 @@ def ncm(clean_speech,processed_speech,fs):
     #   CALCULATE HILBERT ENVELOPES, and resample at F_ENVELOPE Hz
     analytic_x = hilbert( X_BANDS,axis=0);
     X   = np.abs( analytic_x );
-    X   = resample( X , round(len(x)/F_SIGNAL*F_ENVELOPE));
-
+    #X   = resample( X , round(len(x)/F_SIGNAL*F_ENVELOPE));
+    X = resample_matlab_like(X,F_ENVELOPE,F_SIGNAL)
     analytic_y = hilbert( Y_BANDS,axis=0);
     Y = np.abs( analytic_y );
-    Y = resample( Y , round(len(x)/F_SIGNAL*F_ENVELOPE));
-
+    #Y = resample( Y , round(len(x)/F_SIGNAL*F_ENVELOPE));
+    Y = resample_matlab_like(Y,F_ENVELOPE,F_SIGNAL)
     ## ---compute weights based on clean signal's rms envelopes-----
     #
     Ldx, pp=X.shape
