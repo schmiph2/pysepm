@@ -7,31 +7,44 @@ import pytest
 import numpy.testing
 import librosa
 
-RTOL = 1e-3
-ATOL = 1e-3
+RTOL = 1e-12
+ATOL = 0
 
 resultsOrig = loadmat("results.mat")
 resultsOrig=resultsOrig['results']
 
+
+
+freqs = [44100,22050,16000,8000]
+pairs =  [['speech','noisySpeech'],['speech','processed']]
 testScenarios=[]
 pairCounter = 0
-testScenarios.append((['speech.wav','speech_bab_0dB.wav'],resultsOrig[pairCounter,:]))
-pairCounter = pairCounter + 1
-testScenarios.append((['sp04.wav','sp04_babble_sn10.wav'],resultsOrig[pairCounter,:]))
-pairCounter = pairCounter + 1
-testScenarios.append((['enhanced.wav','sp04_babble_sn10.wav'],resultsOrig[pairCounter,:]))
-pairCounter = pairCounter + 1
-testScenarios.append((['sp04.wav','enhanced.wav'],resultsOrig[pairCounter,:]))
-pairCounter = pairCounter + 1
-testScenarios.append((['S_03_01.wav','S_03_01_babble_sn0_klt.wav'],resultsOrig[pairCounter,:]))
-pairCounter = pairCounter + 1
-testScenarios.append((['cleanSample_valIdx12.wav','noisySample_valIdx12.wav'],resultsOrig[pairCounter,:]))
-pairCounter = pairCounter + 1
-testScenarios.append((['cleanSample_valIdx12.wav','enhancedSample_valIdx12.wav'],resultsOrig[pairCounter,:]))
-pairCounter = pairCounter + 1
-testScenarios.append((['cleanSample_valIdx356.wav','noisySample_valIdx356.wav'],resultsOrig[pairCounter,:]))
-pairCounter = pairCounter + 1
-testScenarios.append((['cleanSample_valIdx356.wav','enhancedSample_valIdx356.wav'],resultsOrig[pairCounter,:]))
+for ii in range(1,4):
+    for f in freqs:
+        for pair in pairs:
+            fileNameClean="{}_{}_{}_Hz.wav".format(ii,pair[0],f)
+            fileNameNoisy="{}_{}_{}_Hz.wav".format(ii,pair[1],f)
+            testScenarios.append(([fileNameClean,fileNameNoisy],resultsOrig[pairCounter]))
+            pairCounter=pairCounter+1
+
+
+#testScenarios.append((['speech.wav','speech_bab_0dB.wav'],resultsOrig[pairCounter,:]))
+#pairCounter = pairCounter + 1
+#testScenarios.append((['sp04.wav','sp04_babble_sn10.wav'],resultsOrig[pairCounter,:]))
+#pairCounter = pairCounter + 1
+#testScenarios.append((['enhanced.wav','sp04_babble_sn10.wav'],resultsOrig[pairCounter,:]))
+#pairCounter = pairCounter + 1
+#testScenarios.append((['sp04.wav','enhanced.wav'],resultsOrig[pairCounter,:]))
+#pairCounter = pairCounter + 1
+#testScenarios.append((['S_03_01.wav','S_03_01_babble_sn0_klt.wav'],resultsOrig[pairCounter,:]))
+#pairCounter = pairCounter + 1
+#testScenarios.append((['cleanSample_valIdx12.wav','noisySample_valIdx12.wav'],resultsOrig[pairCounter,:]))
+#pairCounter = pairCounter + 1
+#testScenarios.append((['cleanSample_valIdx12.wav','enhancedSample_valIdx12.wav'],resultsOrig[pairCounter,:]))
+#pairCounter = pairCounter + 1
+#testScenarios.append((['cleanSample_valIdx356.wav','noisySample_valIdx356.wav'],resultsOrig[pairCounter,:]))
+#pairCounter = pairCounter + 1
+#testScenarios.append((['cleanSample_valIdx356.wav','enhancedSample_valIdx356.wav'],resultsOrig[pairCounter,:]))
 
 
 def load_preprocess_filepair(filePair,resample=False,fs_targ=16000):
@@ -40,13 +53,32 @@ def load_preprocess_filepair(filePair,resample=False,fs_targ=16000):
         
     if resample:
         if fs_targ == 16000 and fs !=8000:
-            fs, cleanSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[0])
-            fs, enhancedSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[1])
+            strParts=filePair[0].split('_')
+            fileNameClean="{}_{}_{}_Hz.wav".format(strParts[0],strParts[1],16000)
+            fs, cleanSig = wavfile.read('data/'+fileNameClean)
+
+            strParts=filePair[1].split('_')
+            fileNameNoisy="{}_{}_{}_Hz.wav".format(strParts[0],strParts[1],16000)
+            fs, enhancedSig = wavfile.read('data/'+fileNameNoisy)
+
+            #fs, cleanSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[0])
+            #fs, enhancedSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[1])
         elif fs_targ == 16000 and fs == 8000:
             pass
         else:
-            fs, cleanSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[0])
-            fs, enhancedSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[1])
+            #strParts=filePair[0].split('_')
+            #fileNameClean="{}_{}_{}_Hz.wav".format(strParts[0],strParts[1],10000)
+            #fs, cleanSig = wavfile.read('data/'+fileNameClean)
+            
+            #strParts=filePair[1].split('_')
+            #fileNameNoisy="{}_{}_{}_Hz.wav".format(strParts[0],strParts[1],10000)
+            #fs, enhancedSig = wavfile.read('data/'+fileNameNoisy)
+            
+            cleanSig = librosa.core.resample(cleanSig, fs, fs_targ)
+            enhancedSig = librosa.core.resample(enhancedSig, fs, fs_targ)
+            fs = fs_targ
+            #fs, cleanSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[0])
+            #fs, enhancedSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[1])
 
         #cleanSig=librosa.core.resample(cleanSig, fs,fs_targ)
         #enhancedSig=librosa.core.resample(enhancedSig,fs,fs_targ)        
@@ -56,37 +88,58 @@ def load_preprocess_filepair(filePair,resample=False,fs_targ=16000):
 
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_fwSNRseg(filePair,expected_vals):
+    RTOL = 1e-12
+    ATOL = 0
+
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
     numpy.testing.assert_allclose(pm.fwSNRseg(cleanSig, enhancedSig, fs), expected_vals[0], rtol=RTOL, atol=ATOL)
 
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_SNRseg(filePair,expected_vals):
+    RTOL = 1e-12
+    ATOL = 0
+    
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
     numpy.testing.assert_allclose(pm.SNRseg(cleanSig, enhancedSig, fs), expected_vals[1], rtol=RTOL, atol=ATOL)
 
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_llr(filePair,expected_vals):
+    RTOL = 5e-9
+    ATOL = 0
+
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
     numpy.testing.assert_allclose(pm.llr(cleanSig, enhancedSig, fs), expected_vals[2], rtol=RTOL, atol=ATOL)
 
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_wss(filePair,expected_vals):
+    RTOL = 1e-12
+    ATOL = 0
+
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
     numpy.testing.assert_allclose(pm.wss(cleanSig, enhancedSig, fs), expected_vals[3], rtol=RTOL, atol=ATOL)
 
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_cepstrum_distance(filePair,expected_vals):
+    RTOL = 1e-8
+    ATOL = 0
+    
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
     numpy.testing.assert_allclose(pm.cepstrum_distance(cleanSig, enhancedSig, fs), expected_vals[4], rtol=RTOL, atol=ATOL)
     
-@pytest.mark.parametrize('filePair,expected_vals', testScenarios) # needs 10 kHz samping rate!
+@pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_stoi(filePair,expected_vals):
+    RTOL = 5e-3#5e-4
+    ATOL = 0
+
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair,True,10e3)
     
     numpy.testing.assert_allclose(pm.stoi(cleanSig, enhancedSig, fs), expected_vals[5], rtol=RTOL, atol=ATOL)
     
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios) 
 def test_csii(filePair,expected_vals):
+    RTOL = 5e-4
+    ATOL = 0
+
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
     CSIIh,CSIIm,CSIIl=pm.csii(cleanSig, enhancedSig, fs)
     numpy.testing.assert_allclose(CSIIh, expected_vals[6], rtol=RTOL, atol=ATOL)
@@ -96,12 +149,18 @@ def test_csii(filePair,expected_vals):
     
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios) 
 def test_pesq(filePair,expected_vals):
+    RTOL = 5e-4
+    ATOL = 0
+    
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair,True,16e3)
     pesq_mos,mos_lqo=pm.pesq(cleanSig, enhancedSig, fs)
     numpy.testing.assert_allclose(mos_lqo, expected_vals[10], rtol=RTOL, atol=ATOL)
 
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios) 
 def test_composite(filePair,expected_vals):
+    RTOL = 5e-4
+    ATOL = 0
+
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair,True,16e3)
     Csig,Cbak,Covl=pm.composite(cleanSig, enhancedSig, fs)
     numpy.testing.assert_allclose(Csig, expected_vals[11], rtol=RTOL, atol=ATOL)
@@ -110,21 +169,23 @@ def test_composite(filePair,expected_vals):
     
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_ncm(filePair,expected_vals):
-    rto = 5e-3
-    atol = 2e-3 # higher tolerances due to differences between the used resampling method und the one of matlab
+    RTOL = 5e-6
+    ATOL = 0
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair,True,16e3)
-    numpy.testing.assert_allclose(pm.ncm(cleanSig, enhancedSig, fs), expected_vals[14], rtol=rto, atol=atol)
+    numpy.testing.assert_allclose(pm.ncm(cleanSig, enhancedSig, fs), expected_vals[14], rtol=RTOL, atol=ATOL)
 
     
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_srmr(filePair,expected_vals):
+    RTOL = 5e-4
+    ATOL = 0
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair,True,16e3)
     ratio,energy = pm.srmr(enhancedSig, fs)
     numpy.testing.assert_allclose(ratio, expected_vals[15], rtol=RTOL, atol=ATOL)
 
     
-@pytest.mark.parametrize('filePair,expected_vals', testScenarios)
-def test_bsd(filePair,expected_vals):
-    cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
-    bsd = pm.bsd(cleanSig, enhancedSig, fs)
-    numpy.testing.assert_allclose(bsd, 1e20, rtol=RTOL, atol=ATOL)
+#@pytest.mark.parametrize('filePair,expected_vals', testScenarios)
+#def test_bsd(filePair,expected_vals):
+#    cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
+#    bsd = pm.bsd(cleanSig, enhancedSig, fs)
+#    numpy.testing.assert_allclose(bsd, 1e20, rtol=RTOL, atol=ATOL)
