@@ -180,7 +180,7 @@ def test_srmr(filePair,expected_vals):
     RTOL = 5e-4
     ATOL = 0
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair,True,16e3)
-    ratio,energy = pm.srmr(enhancedSig, fs)
+    ratio = pm.srmr(enhancedSig, fs)
     numpy.testing.assert_allclose(ratio, expected_vals[15], rtol=RTOL, atol=ATOL)
 
     
