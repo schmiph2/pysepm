@@ -1,8 +1,9 @@
 from scipy.signal import stft,get_window,correlate,resample
 from scipy.linalg import solve_toeplitz,toeplitz
+import scipy
 import pesq as pypesq # https://github.com/ludlows/python-pesq
 import numpy as np
-
+from numba import jit
 from .util import extract_overlapped_windows
 
 def SNRseg(clean_speech, processed_speech,fs, frameLen=0.03, overlap=0.75):
@@ -25,7 +26,7 @@ def SNRseg(clean_speech, processed_speech,fs, frameLen=0.03, overlap=0.75):
     segmental_snr[segmental_snr>MAX_SNR]=MAX_SNR
     segmental_snr=segmental_snr[:-1] # remove last frame -> not valid
     return np.mean(segmental_snr)
-	
+
 def fwSNRseg(cleanSig, enhancedSig, fs, frameLen=0.03, overlap=0.75):
     if cleanSig.shape!=enhancedSig.shape:
         raise ValueError('The two signals do not match!')
@@ -116,38 +117,23 @@ def fwSNRseg(cleanSig, enhancedSig, fs, frameLen=0.03, overlap=0.75):
     distortion[distortion>35]=35
 
     return np.mean(distortion)
-	
-	
-#def lpcoeff(speech_frame, model_order):
-#   # ----------------------------------------------------------
-#   # (1) Compute Autocorrelation Lags
-#   # ----------------------------------------------------------
-#
-#    R=correlate(speech_frame,speech_frame) 
-#    R=R[len(speech_frame)-1:len(speech_frame)+model_order]
-#   # ----------------------------------------------------------
-#   # (2) Levinson-Durbin
-#   # ----------------------------------------------------------
-#    lpparams=np.ones((model_order+1))
-#    lpparams[1:]=solve_toeplitz(R[0:-1],-R[1:])
-#    
-#    return(lpparams,R)
-
+@jit
 def lpcoeff(speech_frame, model_order):
+    eps=np.finfo(np.float64).eps
    # ----------------------------------------------------------
    # (1) Compute Autocorrelation Lags
    # ----------------------------------------------------------
     winlength = max(speech_frame.shape)
-    #R = np.zeros((model_order+1,))
-    #for k in range(model_order+1):
-    #    if k==0:
-    #        R[k]=np.sum(speech_frame[0:]*speech_frame[0:])
-    #    else:
-    #        R[k]=np.sum(speech_frame[0:-k]*speech_frame[k:])
-    #    
+    R = np.zeros((model_order+1,))
+    for k in range(model_order+1):
+        if k==0:
+            R[k]=np.sum(speech_frame[0:]*speech_frame[0:])
+        else:
+            R[k]=np.sum(speech_frame[0:-k]*speech_frame[k:])
+        
      
-    R=correlate(speech_frame,speech_frame) 
-    R=R[len(speech_frame)-1:len(speech_frame)+model_order]
+    #R=scipy.signal.correlate(speech_frame,speech_frame) 
+    #R=R[len(speech_frame)-1:len(speech_frame)+model_order]
    # ----------------------------------------------------------
    # (2) Levinson-Durbin
    # ----------------------------------------------------------
@@ -161,12 +147,13 @@ def lpcoeff(speech_frame, model_order):
     for i in range(0,model_order):
         a_past[0:i] = a[0:i]
 
-        sum_term = sum(a_past[0:i]*R[i:0:-1])
-        rcoeff[i]=(R[i+1] - sum_term) / E[i]
+        sum_term = np.sum(a_past[0:i]*R[i:0:-1])
+        rcoeff[i]=(R[i+1] - sum_term) / (E[i]+eps)
         a[i]=rcoeff[i]
-        if i==0:
-            a[0:i] = a_past[0:i] - rcoeff[i]*np.array([])
-        else:
+        #if i==0:
+        #    a[0:i] = a_past[0:i] - rcoeff[i]*np.array([])
+        #else:
+        if i>0:
             a[0:i] = a_past[0:i] - rcoeff[i]*a_past[i-1::-1]
 
         E[i+1]=(1-rcoeff[i]*rcoeff[i])*E[i]
@@ -175,7 +162,8 @@ def lpcoeff(speech_frame, model_order):
     refcoeff = rcoeff;
     lpparams = np.ones((model_order+1,))
     lpparams[1:] = -a
-    
+    if np.any(np.isnan(lpparams)):
+        raise ValueError('123')
     return(lpparams,R)
 
 def llr(clean_speech, processed_speech, fs, used_for_composite=False, frameLen=0.03, overlap=0.75):
@@ -203,16 +191,18 @@ def llr(clean_speech, processed_speech, fs, used_for_composite=False, frameLen=0
         denominators[ii]=A_clean.dot(toeplitz(R_clean).dot(A_clean.T))
     
     
-    frac=numerators/denominators
+    frac=numerators/(denominators)
+    frac[np.isnan(frac)]=np.inf
     frac[frac<=0]=1000
     distortion = np.log(frac)
     if not used_for_composite:
-        distortion[distortion>2]=2 # this line is not in composite measure matlab implementation of loizou
+        distortion[distortion>2]=2 # this line is not in composite measure but in llr matlab implementation of loizou
     distortion = np.sort(distortion)
     distortion = distortion[:int(round(len(distortion)*alpha))]
     return np.mean(distortion)
 
 
+@jit
 def find_loc_peaks(slope,energy):
     num_crit = len(energy)
     
@@ -386,6 +376,7 @@ def composite(clean_speech, processed_speech, fs):
     Covl = np.min((5, Covl)) # limit values to [1, 5]
     return Csig,Cbak,Covl
 
+@jit
 def lpc2cep(a):
     #
     # converts prediction to cepstrum coefficients
