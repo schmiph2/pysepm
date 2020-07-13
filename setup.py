@@ -11,6 +11,7 @@ setup(
     install_requires=[
 	    'numpy',
 		'scipy',
+        'numba',
 		'pystoi',
 		'pesq @ https://github.com/ludlows/python-pesq/archive/master.zip#egg=pesq',
 		'SRMRpy @  https://github.com/jfsantos/SRMRpy/archive/master.zip#egg=SRMRpy',
