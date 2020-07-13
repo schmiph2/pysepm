@@ -148,7 +148,10 @@ def lpcoeff(speech_frame, model_order):
         a_past[0:i] = a[0:i]
 
         sum_term = np.sum(a_past[0:i]*R[i:0:-1])
-        rcoeff[i]=(R[i+1] - sum_term) / (E[i]+eps)
+        if np.abs(E[i]) < eps:
+            rcoeff[i]=np.inf
+        else:
+            rcoeff[i]=(R[i+1] - sum_term) / (E[i])
         a[i]=rcoeff[i]
         #if i==0:
         #    a[0:i] = a_past[0:i] - rcoeff[i]*np.array([])
@@ -162,8 +165,6 @@ def lpcoeff(speech_frame, model_order):
     refcoeff = rcoeff;
     lpparams = np.ones((model_order+1,))
     lpparams[1:] = -a
-    if np.any(np.isnan(lpparams)):
-        raise ValueError('123')
     return(lpparams,R)
 
 def llr(clean_speech, processed_speech, fs, used_for_composite=False, frameLen=0.03, overlap=0.75):
