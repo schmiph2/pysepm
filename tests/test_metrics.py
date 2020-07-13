@@ -28,25 +28,6 @@ for ii in range(1,4):
             pairCounter=pairCounter+1
 
 
-#testScenarios.append((['speech.wav','speech_bab_0dB.wav'],resultsOrig[pairCounter,:]))
-#pairCounter = pairCounter + 1
-#testScenarios.append((['sp04.wav','sp04_babble_sn10.wav'],resultsOrig[pairCounter,:]))
-#pairCounter = pairCounter + 1
-#testScenarios.append((['enhanced.wav','sp04_babble_sn10.wav'],resultsOrig[pairCounter,:]))
-#pairCounter = pairCounter + 1
-#testScenarios.append((['sp04.wav','enhanced.wav'],resultsOrig[pairCounter,:]))
-#pairCounter = pairCounter + 1
-#testScenarios.append((['S_03_01.wav','S_03_01_babble_sn0_klt.wav'],resultsOrig[pairCounter,:]))
-#pairCounter = pairCounter + 1
-#testScenarios.append((['cleanSample_valIdx12.wav','noisySample_valIdx12.wav'],resultsOrig[pairCounter,:]))
-#pairCounter = pairCounter + 1
-#testScenarios.append((['cleanSample_valIdx12.wav','enhancedSample_valIdx12.wav'],resultsOrig[pairCounter,:]))
-#pairCounter = pairCounter + 1
-#testScenarios.append((['cleanSample_valIdx356.wav','noisySample_valIdx356.wav'],resultsOrig[pairCounter,:]))
-#pairCounter = pairCounter + 1
-#testScenarios.append((['cleanSample_valIdx356.wav','enhancedSample_valIdx356.wav'],resultsOrig[pairCounter,:]))
-
-
 def load_preprocess_filepair(filePair,resample=False,fs_targ=16000):
     fs, cleanSig = wavfile.read('data/'+filePair[0])
     fs, enhancedSig = wavfile.read('data/'+filePair[1])
@@ -61,28 +42,13 @@ def load_preprocess_filepair(filePair,resample=False,fs_targ=16000):
             fileNameNoisy="{}_{}_{}_Hz.wav".format(strParts[0],strParts[1],16000)
             fs, enhancedSig = wavfile.read('data/'+fileNameNoisy)
 
-            #fs, cleanSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[0])
-            #fs, enhancedSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[1])
         elif fs_targ == 16000 and fs == 8000:
             pass
         else:
-            #strParts=filePair[0].split('_')
-            #fileNameClean="{}_{}_{}_Hz.wav".format(strParts[0],strParts[1],10000)
-            #fs, cleanSig = wavfile.read('data/'+fileNameClean)
-            
-            #strParts=filePair[1].split('_')
-            #fileNameNoisy="{}_{}_{}_Hz.wav".format(strParts[0],strParts[1],10000)
-            #fs, enhancedSig = wavfile.read('data/'+fileNameNoisy)
             
             cleanSig = librosa.core.resample(cleanSig, fs, fs_targ)
             enhancedSig = librosa.core.resample(enhancedSig, fs, fs_targ)
             fs = fs_targ
-            #fs, cleanSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[0])
-            #fs, enhancedSig = wavfile.read('data/'+str(int(fs_targ/1000))+'kHz_'+filePair[1])
-
-        #cleanSig=librosa.core.resample(cleanSig, fs,fs_targ)
-        #enhancedSig=librosa.core.resample(enhancedSig,fs,fs_targ)        
-        #fs = fs_targ        
 
     return cleanSig,enhancedSig,fs
 
@@ -104,7 +70,7 @@ def test_SNRseg(filePair,expected_vals):
 
 @pytest.mark.parametrize('filePair,expected_vals', testScenarios)
 def test_llr(filePair,expected_vals):
-    RTOL = 5e-9
+    RTOL = 5e-8
     ATOL = 0
 
     cleanSig,enhancedSig,fs=load_preprocess_filepair(filePair)
