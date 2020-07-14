@@ -82,14 +82,18 @@ def barks(fs, n_fft, n_barks=128, fmin=0.0, fmax=None, norm='area', dtype=np.flo
 
 def bsd(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
     
+    pre_emphasis_coeff = 0.95
+    b = np.array([1])
+    a = np.array([1,pre_emphasis_coeff])
+    clean_speech = scipy.signal.lfilter(b,a,clean_speech)
+    processed_speech = scipy.signal.lfilter(b,a,processed_speech)
+
     winlength   = round(frameLen*fs) #window length in samples
     skiprate    = int(np.floor((1-overlap)*frameLen*fs)) #window skip in samples
     max_freq    = fs/2 #maximum bandwidth
     n_fft       = 2**np.ceil(np.log2(2*winlength))
     n_fftby2    = int(n_fft/2)
     num_frames = len(clean_speech)/skiprate-(winlength/skiprate)# number of frames
-
-    print('include pre-emphasis')
     
     hannWin=scipy.signal.windows.hann(winlength)#0.5*(1-np.cos(2*np.pi*np.arange(1,winlength+1)/(winlength+1)))
     f,t,Zxx=stft(clean_speech[0:int(num_frames)*skiprate+int(winlength-skiprate)], fs=fs, window=hannWin, nperseg=winlength, noverlap=winlength-skiprate, nfft=n_fft, detrend=False, return_onesided=True, boundary=None, padded=False)
