@@ -9,7 +9,7 @@ Install pysepm:
 ```
 pip3 install https://github.com/schmiph2/pysepm/archive/master.zip
 ```
-# Example
+# Examples
 Please find a Jupyter Notebook with examples for all implemented measures in the [examples folder](https://github.com/schmiph2/pysepm/tree/master/examples).
 
 # Implemented Measures
@@ -30,8 +30,3 @@ Please find a Jupyter Notebook with examples for all implemented measures in the
 ## Dereverberation Measures (TODO)
 + Bark spectral distortion (BSD) 
 + Scale-invariant signal to distortion ratio (SI-SDR)
-
-
-# TODO:
-+ systematic tests for all measures
-+ change resample method used (e.g. in NCM) to fit matlab implementation
