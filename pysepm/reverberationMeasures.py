@@ -1,4 +1,5 @@
 from scipy.signal import resample,stft
+import scipy
 import srmrpy #https://github.com/jfsantos/SRMRpy
 import numpy as np
 from .qualityMeasures import SNRseg
@@ -46,7 +47,7 @@ def bark_frequencies(n_barks=128, fmin=0.0, fmax=11025.0):
 
     return bark_to_hz(barks)
 
-def barks(fs, n_fft, n_barks=128, fmin=0.0, fmax=None, norm='slaney', dtype=np.float32):
+def barks(fs, n_fft, n_barks=128, fmin=0.0, fmax=None, norm='area', dtype=np.float32):
 
     if fmax is None:
         fmax = float(fs) / 2
@@ -73,11 +74,10 @@ def barks(fs, n_fft, n_barks=128, fmin=0.0, fmax=None, norm='slaney', dtype=np.f
         # .. then intersect them with each other and zero
         weights[i] = np.maximum(0, np.minimum(lower, upper))        
 
-    if norm in (1, 'slaney'):
-        # Slaney-style bark is scaled to be approx constant energy per channel
-        enorm = 2.0 / (bark_f[2:n_barks+2] - bark_f[:n_barks])
-        weights *= enorm[:, np.newaxis]
-    print('bark filter not tested')
+    if norm in (1, 'area'):
+        weightsPerBand=np.sum(weights,1);
+        for i in range(weights.shape[0]):
+            weights[i,:]=weights[i,:]/weightsPerBand[i]
     return weights
 
 def bsd(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
@@ -91,19 +91,21 @@ def bsd(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
 
     print('include pre-emphasis')
     
-    hannWin=0.5*(1-np.cos(2*np.pi*np.arange(1,winlength+1)/(winlength+1)))
+    hannWin=scipy.signal.windows.hann(winlength)#0.5*(1-np.cos(2*np.pi*np.arange(1,winlength+1)/(winlength+1)))
     f,t,Zxx=stft(clean_speech[0:int(num_frames)*skiprate+int(winlength-skiprate)], fs=fs, window=hannWin, nperseg=winlength, noverlap=winlength-skiprate, nfft=n_fft, detrend=False, return_onesided=True, boundary=None, padded=False)
-    clean_power_spec=np.square(np.abs(Zxx))
+    clean_power_spec=np.square(np.sum(hannWin)*np.abs(Zxx))
     f,t,Zxx=stft(processed_speech[0:int(num_frames)*skiprate+int(winlength-skiprate)], fs=fs, window=hannWin, nperseg=winlength, noverlap=winlength-skiprate, nfft=n_fft, detrend=False, return_onesided=True, boundary=None, padded=False)
-    enh_power_spec=np.square(np.abs(Zxx))
+    enh_power_spec=np.square(np.sum(hannWin)*np.abs(Zxx))
 
     bark_filt = barks(fs, n_fft, n_barks=32)
     clean_power_spec_bark= np.dot(bark_filt,clean_power_spec)
     enh_power_spec_bark= np.dot(bark_filt,enh_power_spec)
     
+    clean_power_spec_bark_2=np.square(clean_power_spec_bark)
+    diff_power_spec_2 = np.square(clean_power_spec_bark-enh_power_spec_bark)
     
-    bsd = np.mean(np.sum(np.square(clean_power_spec_bark-enh_power_spec_bark),axis=0)/np.sum(np.square(clean_power_spec_bark),axis=0))
-    return bsd,clean_power_spec_bark,enh_power_spec_bark
+    bsd = np.mean(np.sum(diff_power_spec_2,axis=0)/np.sum(clean_power_spec_bark_2,axis=0))
+    return bsd
 
 
         
