@@ -1,15 +1,17 @@
 # pysepm - Speech Enhancement Performance Measures (Quality and Intelligibility) Implemented in Python
 Python implementation of objective quality and intelligibilty measures mentioned in Philipos C. Loizou's great [Speech Enhancement Book](https://www.crcpress.com/Speech-Enhancement-Theory-and-Practice-Second-Edition/Loizou/p/book/9781138075573). The Python implementations are checked with the MATLAB implementations attached to the book (see [Link](https://crcpress.com/downloads/K14513/K14513_CD_Files.zip))
 
+# Contribution
+If you would like to have an additional measure or if you find a bug/expected behaviour please create an issue.
 
-# Requirements
+# Install with pip
+Install pysepm:
+```
+pip3 install https://github.com/schmiph2/pysepm/archive/master.zip
+```
+# Examples
+Please find a Jupyter Notebook with examples for all implemented measures in the [examples folder](https://github.com/schmiph2/pysepm/tree/master/examples).
 
-    gcc compiler
-    cython
-    numpy
-    scipy
-    pystoi
-    pypesq 
 # Implemented Measures
 ## Speech Quality Measures
 + Segmental Signal-to-Noise Ratio (SNRseg)
@@ -28,13 +30,3 @@ Python implementation of objective quality and intelligibilty measures mentioned
 ## Dereverberation Measures (TODO)
 + Bark spectral distortion (BSD) 
 + Scale-invariant signal to distortion ratio (SI-SDR)
-# Install with pip
-Install pysepm:
-```
-pip3 install https://github.com/schmiph2/pysepm/archive/master.zip
-```
-
-
-# TODO:
-+ systematic tests for all measures
-+ change resample method used (e.g. in NCM) to fit matlab implementation
