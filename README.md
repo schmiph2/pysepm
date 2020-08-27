@@ -1,4 +1,4 @@
-# pysepm - Speech Enhancement Performance Measures (Quality and Intelligibility) Implemented in Python
+# pysepm - Python Speech Enhancement Performance Measures (Quality and Intelligibility)
 Python implementation of objective quality and intelligibilty measures mentioned in Philipos C. Loizou's great [Speech Enhancement Book](https://www.crcpress.com/Speech-Enhancement-Theory-and-Practice-Second-Edition/Loizou/p/book/9781138075573). The Python implementations are checked with the MATLAB implementations attached to the book (see [Link](https://crcpress.com/downloads/K14513/K14513_CD_Files.zip))
 
 # Contribution
