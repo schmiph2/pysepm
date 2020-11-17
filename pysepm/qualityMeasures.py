@@ -148,10 +148,12 @@ def lpcoeff(speech_frame, model_order):
         a_past[0:i] = a[0:i]
 
         sum_term = np.sum(a_past[0:i]*R[i:0:-1])
-        if np.abs(E[i]) < eps:
-            rcoeff[i]=np.inf
+		
+        if E[i]==0.0: # prevents zero division error, numba doesn't allow try/except statements
+            rcoeff[i]= np.inf
         else:
             rcoeff[i]=(R[i+1] - sum_term) / (E[i])
+			
         a[i]=rcoeff[i]
         #if i==0:
         #    a[0:i] = a_past[0:i] - rcoeff[i]*np.array([])
@@ -178,8 +180,8 @@ def llr(clean_speech, processed_speech, fs, used_for_composite=False, frameLen=0
         P = 16 # this could vary depending on sampling frequency.
         
     hannWin=0.5*(1-np.cos(2*np.pi*np.arange(1,winlength+1)/(winlength+1)))
-    clean_speech_framed=extract_overlapped_windows(clean_speech,winlength,winlength-skiprate,hannWin)
-    processed_speech_framed=extract_overlapped_windows(processed_speech,winlength,winlength-skiprate,hannWin)
+    clean_speech_framed=extract_overlapped_windows(clean_speech+eps,winlength,winlength-skiprate,hannWin)
+    processed_speech_framed=extract_overlapped_windows(processed_speech+eps,winlength,winlength-skiprate,hannWin)
     numFrames=clean_speech_framed.shape[0]
     numerators = np.zeros((numFrames-1,))
     denominators = np.zeros((numFrames-1,))
