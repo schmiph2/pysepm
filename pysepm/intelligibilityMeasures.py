@@ -1,11 +1,11 @@
 from scipy.signal import stft,resample,butter,lfilter,hilbert
 from scipy.interpolate import interp1d
-import pystoi.stoi # https://github.com/mpariente/pystoi
+from pystoi import stoi as pystoi # https://github.com/mpariente/pystoi
 import numpy as np
 
 from .util import extract_overlapped_windows,resample_matlab_like
 
-stoi = pystoi.stoi
+stoi = pystoi
 
 def fwseg_noise(clean_speech, processed_speech,fs,frameLen=0.03, overlap=0.75):
     
