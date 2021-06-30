@@ -17,12 +17,12 @@ Please find a Jupyter Notebook with examples for all implemented measures in the
 + Frequency-weighted Segmental SNR (fwSNRseg)
 + Log-likelihood Ratio (LLR)
 + Weighted Spectral Slope (WSS)
-+ Perceptual Evaluation of Speech Quality (PESQ)
++ Perceptual Evaluation of Speech Quality (PESQ), ([python-pesq](https://github.com/ludlows/python-pesq) implementation by ludlows)
 + Composite Objective Speech Quality (composite)
 + Cepstrum Distance Objective Speech Quality Measure (CD)
 
 ## Speech Intelligibility Measures
-+ Short-time objective intelligibility (STOI)
++ Short-time objective intelligibility (STOI), ([pystoi](https://github.com/mpariente/pystoi) implementation by mpariente)
 + Coherence and speech intelligibility index (CSII)
 + Normalized-covariance measure (NCM)
 
