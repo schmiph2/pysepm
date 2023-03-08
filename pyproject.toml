@@ -1,2 +1,27 @@
+[tool.poetry]
+name = "pysepm"
+version = "0.1.1"
+description = "Computes Objective Quality Measures"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+numpy = "*"
+scipy = "*"
+numba = "*"
+pystoi = "*"
+librosa = "^0.10.0"
+pesq = { url = "https://github.com/ludlows/python-pesq/archive/master.zip" }
+SRMRpy = { url = "https://github.com/jfsantos/SRMRpy/archive/master.zip" }
+torch = "^1.13.1"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+isort = "*"
+ipython = "^8.11.0"
+
 [build-system]
-requires = ["setuptools", "wheel", "Cython","numpy"]
+requires = ["poetry-core>=1.0.0", "setuptools", "wheel", "Cython", "numpy"]
+
+build-backend = "poetry.core.masonry.api"
