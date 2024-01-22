@@ -344,15 +344,24 @@ def wss(clean_speech, processed_speech, fs, frameLen=0.03, overlap=0.75):
     distortion = distortion[:int(round(len(distortion)*alpha))]
     return np.mean(distortion)
 
-def pesq(clean_speech, processed_speech, fs):
-    if fs == 8000:
-        mos_lqo = pypesq.pesq(fs,clean_speech, processed_speech, 'nb')
+def pesq(clean_speech, processed_speech, fs, mode=None):
+    if (fs != 8000) and (fs != 16000):
+	    raise ValueError('fs must be either 8 kHz or 16 kHz')	
+
+    if mode is None:
+        if fs == 8000:
+            mode = 'nb'
+        elif fs == 16000:
+            mode = 'wb'
+
+    if mode == 'nb':
+        mos_lqo = pypesq.pesq(fs,clean_speech, processed_speech, mode)
         pesq_mos = 46607/14945 - (2000*np.log(1/(mos_lqo/4 - 999/4000) - 1))/2989#0.999 + ( 4.999-0.999 ) / ( 1+np.exp(-1.4945*pesq_mos+4.6607) )
-    elif fs == 16000:
-        mos_lqo = pypesq.pesq(fs,clean_speech, processed_speech, 'wb')
+    elif mode == 'wb':
+        mos_lqo = pypesq.pesq(fs,clean_speech, processed_speech, mode)
         pesq_mos = np.NaN
     else:
-        raise ValueError('fs must be either 8 kHz or 16 kHz')
+        print('mode should be "nb" for narrowband or "wb" for wideband')
         
     return pesq_mos,mos_lqo
 
