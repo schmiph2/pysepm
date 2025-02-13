@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.signal import firls,kaiser,upfirdn
+from scipy.signal.windows import kaiser
+from scipy.signal import firls, upfirdn
 from fractions import Fraction
 
 def extract_overlapped_windows(x,nperseg,noverlap,window=None):
